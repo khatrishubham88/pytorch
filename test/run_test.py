@@ -44,6 +44,8 @@ try:
     #     TARGET_DET_LIST,
     # )
 
+    import tools.testing.manual_determinator as manual_determinator
+
     HAVE_TEST_SELECTION_TOOLS = True
 except ImportError:
     HAVE_TEST_SELECTION_TOOLS = False
@@ -948,7 +950,9 @@ def main():
         )
 
     test_directory = str(REPO_ROOT / "test")
+    print("GET SEL")
     selected_tests = get_selected_tests(options)
+    print("DONE")
 
     if options.verbose:
         print_to_stderr("Selected tests: {}".format(", ".join(selected_tests)))
@@ -988,6 +992,21 @@ def main():
         )
         # downloading test cases configuration to local environment
         get_test_case_configs(dirpath=test_directory)
+
+    print("DETERMINATING")
+    determined_tests = manual_determinator.determinate(
+        1,
+        REPO_ROOT / "test" / "manual_determinations.yml",
+        selected_tests,
+        CORE_TEST_LIST,
+    )
+    print(
+        f"Target determinator filtered from:\n{manual_determinator.indent_list(selected_tests)}\n"
+        f"to:\n{manual_determinator.indent_list(determined_tests)}"
+    )
+    print("DONE")
+    selected_tests = determined_tests
+    # exit(0)
 
     has_failed = False
     failure_messages = []
